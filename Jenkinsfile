@@ -1,26 +1,23 @@
 pipeline {
   agent any
-  environment {
-    MAVEN_OPTS = "-s /home/ubuntu/.m2/settings.xml"
-  }
   stages {
     stage('Build') {
       steps {
         echo 'Building...'
-        sh 'mvn ${MAVEN_OPTS} clean package'
+        sh 'mvn -s /home/ubuntu/.m2/settings.xml clean package'
       }
     }
     stage('Test') {
       steps {
         echo 'Testing...'
-        sh 'mvn ${MAVEN_OPTS} test'
+        sh 'mvn -s /home/ubuntu/.m2/settings.xml test'
       }
     }
   }
   post {
     always {
       echo 'Cleaning up...'
-      sh 'mvn ${MAVEN_OPTS} clean'
+      sh 'mvn -s /home/ubuntu/.m2/settings.xml clean'
     }
   }
 }
