@@ -4,20 +4,20 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building...'
-        sh 'mvn -s /home/ubuntu/.m2/settings.xml clean package'
+        sh 'mvn -s /var/lib/jenkins/.m2/settings.xml clean package'
       }
     }
     stage('Test') {
       steps {
         echo 'Testing...'
-        sh 'mvn -s /home/ubuntu/.m2/settings.xml test'
+        sh 'mvn -s /var/lib/jenkins/.m2/settings.xml test'
       }
     }
   }
   post {
     always {
       echo 'Cleaning up...'
-      sh 'mvn -s /home/ubuntu/.m2/settings.xml clean'
+      sh 'mvn -s /var/lib/jenkins/.m2/settings.xml clean'
     }
   }
 }
