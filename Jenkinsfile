@@ -28,10 +28,10 @@ pipeline {
         }
         stage('JFrog Xray Scan') {
             steps {
-                sh 'jfrog rt build-collect-env spring-petclinic ${BUILD_NUMBER}'
-                sh 'jfrog rt build-add-dependencies spring-petclinic ${BUILD_NUMBER} "**/*.jar"'
-                sh 'jfrog rt build-publish spring-petclinic ${BUILD_NUMBER}'
-                sh 'jfrog rt bs spring-petclinic ${BUILD_NUMBER}'
+                sh 'jf rt build-collect-env spring-petclinic ${BUILD_NUMBER}'
+                sh 'jf rt build-add-dependencies spring-petclinic ${BUILD_NUMBER} "**/*.jar"'
+                sh 'jf rt build-publish spring-petclinic ${BUILD_NUMBER}'
+                sh 'jf rt bs spring-petclinic ${BUILD_NUMBER}'
             }
         }
         stage('Docker Build') {
