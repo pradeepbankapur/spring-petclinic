@@ -12,7 +12,7 @@ pipeline {
         stage('Setup JFrog CLI') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jfrog-creds', usernameVariable: 'JFROG_USER', passwordVariable: 'JFROG_PASSWORD')]) {
-                    sh 'jfrog config add my-server --url=https://your_jfrog_instance_url --user=$JFROG_USER --password=$JFROG_PASSWORD --interactive=false'
+                    sh 'jfrog config add my-server --url=https://jfrogspring.jfrog.io --user=$JFROG_USER --password=$JFROG_PASSWORD --interactive=false'
                 }
             }
         }
