@@ -8,7 +8,7 @@ pipeline {
     }
     tools {
         // Ensure Maven is defined in your Jenkins configuration
-        maven 'Maven'
+        maven 'Jenkins Managed Maven'
     }
     stages {
         stage('Build') {
