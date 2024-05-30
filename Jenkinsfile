@@ -1,59 +1,65 @@
 pipeline {
     agent any
     environment {
-        JFROG_CLI_HOME = "${env.WORKSPACE}/jfrog-cli"
-        ARTIFACTORY_SERVER = 'jfrog-server'
-        DOCKER_IMAGE = 'docker-jfrog'
+        // Define the Docker image tag
+        DOCKER_IMAGE = 'spring-petclinic:latest'
+        // Define your Artifactory repository key
+        ARTIFACTORY_REPO = 'docker-jfrog'
     }
     tools {
-        jfrog 'JFrogCLI'
+        // Ensure Maven is defined in your Jenkins configuration
+        maven 'Maven'
     }
     stages {
-        stage('Setup JFrog CLI') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'jfrog-creds', usernameVariable: 'JFROG_USER', passwordVariable: 'JFROG_PASSWORD')]) {
-                    sh 'jf config add my-server-${BUILD_NUMBER} --url=https://jfrogspring.jfrog.io --user=$JFROG_USER --password=$JFROG_PASSWORD --interactive=false'
-                }
-            }
-        }
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                script {
+                    // Clean and install the project without running tests
+                    sh 'mvn clean install -DskipTests'
+                }
             }
         }
         stage('Test') {
             steps {
+                // Run tests separately
                 sh 'mvn test'
             }
         }
         stage('JFrog Xray Scan') {
             steps {
-                sh 'jf rt build-collect-env spring-petclinic ${BUILD_NUMBER}'
-                sh 'jf rt build-add-dependencies spring-petclinic ${BUILD_NUMBER} "**/*.jar"'
-                sh 'jf rt build-publish spring-petclinic ${BUILD_NUMBER}'
-                sh 'jf rt bs spring-petclinic ${BUILD_NUMBER}'
+                script {
+                    // Scan with JFrog Xray
+                    sh 'jf rt build-scan ${BUILD_TAG} --fail=true'
+                }
             }
         }
         stage('Docker Build') {
             steps {
                 script {
-                    def dockerImageTag = "${env.BUILD_NUMBER}"
-                    sh "docker build -t ${DOCKER_IMAGE}:${dockerImageTag} ."
+                    // Build Docker image
+                    sh 'docker build -t $DOCKER_IMAGE .'
                 }
             }
         }
-        stage('Publish Docker Image to Artifactory') {
+        stage('Docker Push') {
             steps {
                 script {
-                    def dockerImageTag = "${env.BUILD_NUMBER}"
-                    sh "jfrog rt docker-push ${DOCKER_IMAGE}:${dockerImageTag} my-docker-repo --build-name=spring-petclinic --build-number=${BUILD_NUMBER}"
+                    // Log in and push Docker image to JFrog Artifactory
+                    sh 'jf rt docker-push $DOCKER_IMAGE $ARTIFACTORY_REPO'
                 }
             }
         }
     }
     post {
         always {
-            cleanWs()
+            // Cleanup Docker images
+            sh 'docker rmi $DOCKER_IMAGE'
+        }
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
