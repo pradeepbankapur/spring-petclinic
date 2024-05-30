@@ -5,6 +5,10 @@ pipeline {
         DOCKER_IMAGE = 'spring-petclinic:latest'
         // Define your Artifactory repository key
         ARTIFACTORY_REPO = 'docker-jfrog'
+        // Define JFrog Artifactory details
+        ARTIFACTORY_URL = 'https://jfrogspring.jfrog.io'
+        ARTIFACTORY_USER = credentials('Pradeep')
+        ARTIFACTORY_API_KEY = credentials('Haloofblood123')
     }
     tools {
         // Ensure Maven is defined in your Jenkins configuration
@@ -28,8 +32,10 @@ pipeline {
         stage('JFrog Xray Scan') {
             steps {
                 script {
+                    // Configure JFrog CLI
+                    sh 'jfrog rt config --url=$ARTIFACTORY_URL --user=$ARTIFACTORY_USER --apikey=$ARTIFACTORY_API_KEY'
                     // Scan with JFrog Xray
-                    sh 'jf rt build-scan ${BUILD_TAG} --fail=true'
+                    sh 'jfrog rt build-scan ${JOB_NAME}-${BUILD_NUMBER} --fail=true'
                 }
             }
         }
@@ -44,16 +50,20 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
-                    // Log in and push Docker image to JFrog Artifactory
-                    sh 'jf rt docker-push $DOCKER_IMAGE $ARTIFACTORY_REPO'
+                    // Log in to JFrog Artifactory
+                    sh 'jfrog rt docker-login'
+                    // Push Docker image to JFrog Artifactory
+                    sh 'jfrog rt docker-push $DOCKER_IMAGE $ARTIFACTORY_REPO'
                 }
             }
         }
     }
     post {
         always {
-            // Cleanup Docker images
-            sh 'docker rmi $DOCKER_IMAGE'
+            script {
+                // Cleanup Docker images
+                sh 'docker rmi $DOCKER_IMAGE || true'
+            }
         }
         success {
             echo 'Pipeline completed successfully.'
