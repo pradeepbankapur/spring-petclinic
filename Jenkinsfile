@@ -27,32 +27,9 @@ pipeline {
             }
         }
 
-        stage('XRay Scan Setup') {
-            steps {
-                script {
-                    sh "jf mvn-config --server-id-resolve=jfrog-server --server-id-deploy=jfrog-server --repo-resolve-releases=spring-petclinic-maven --repo-resolve-snapshots=spring-petclinic-maven --repo-deploy-releases=spring-petclinic-maven --repo-deploy-snapshots=spring-petclinic-maven"
-                }
-            }
-        }
-
         stage('XRay Scan') {
             steps {
-                script {
-                    def buildName = env.JOB_NAME
-                    def buildNumber = env.BUILD_NUMBER
-                    def buildInfo = 'build-info.json'
-
-                    // Run Maven build with JFrog CLI, capturing build information
-                    sh "jf mvn clean install -DskipTests --build-name=${buildName} --build-number=${buildNumber} --module=${buildName} --build-info-output-file=${buildInfo}"
-
-                    // Collect environment variables
-                    sh "jf rt build-collect-env ${buildName} ${buildNumber}"
-
-                    // Add build dependencies
-                    sh "jf rt build-add-dependencies ${buildName} ${buildNumber}"
-
-                    // Perform XRay scan and fail the build if any vulnerabilities are found
-                    sh "jf rt build-scan ${buildName} ${buildNumber} --fail=true"
+               sh "jf scan ${env.BUILD_ID} $env.BUILD_NUMBER}"
                 }
             }
         }
