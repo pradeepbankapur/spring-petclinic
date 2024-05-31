@@ -27,13 +27,23 @@ pipeline {
             }
         }
 
+        stage('XRay Scan Setup') {
+            steps {
+                script {
+                    sh "jf mvn-config --server-id-resolve=jfrog-server --repo-resolve=${MAVEN_REPO} --server-id-deploy=jfrog-server --repo-deploy=${MAVEN_REPO}"
+                }
+            }
+        }
+
         stage('XRay Scan') {
             steps {
                 script {
-                    sh "jf mvn --build-name=${env.BUILD_ID} --build-number=${env.BUILD_NUMBER}"
-                    sh "jf rt build-collect-env ${env.BUILD_ID} ${env.BUILD_NUMBER}"
-                    sh "jf rt build-add-dependencies ${env.BUILD_ID} ${env.BUILD_NUMBER}"
-                    sh "jf build-scan ${env.BUILD_ID} ${env.BUILD_NUMBER}"
+                    // Perform the XRay scan
+                    def buildInfo = 'build-info.json'
+                    sh "jf mvn clean install -DskipTests --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER} --module=${env.JOB_NAME} --build-info-output-file=${buildInfo}"
+                    sh "jf rt build-collect-env ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+                    sh "jf rt build-add-dependencies ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+                    sh "jf rt build-scan ${env.JOB_NAME} ${env.BUILD_NUMBER} --fail"
                 }
             }
         }
