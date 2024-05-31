@@ -34,7 +34,7 @@ pipeline {
         stage('XRay Scan') {
             steps {
                 script {
-                    sh "./jfrog rt scan ${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID} --server-id=jfrog-server"
+                    sh "${JFROG_CLI} rt scan ${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID} --server-id=jfrog-server"
                 }
             }
         }
