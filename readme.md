@@ -23,6 +23,7 @@ Below are the steps done:
 - Docker
 
 ###Command to obtain and run the Docker image:
+
 Login: docker login jfrogspring.jfrog.io -u <username> -p <password>
 Pull the Docker Image: docker pull jfrogspring.jfrog.io/docker-jfrog/spring-petclinic:59
 Run the Docker Container: docker run -d --name petclinic -p 8080:8080 jfrogspring.jfrog.io/docker-jfrog/spring-petclinic:59
