@@ -4,12 +4,12 @@ pipeline {
     tools {
         maven 'Jenkins Managed Maven'
         jdk 'JDK 17'
+        jfrog 'JFrogCLI'
     }
 
     environment {
         DOCKER_IMAGE = 'spring-petclinic'
         ARTIFACTORY_URL = 'jfrogspring.jfrog.io/docker-jfrog'
-        JFROG_CLI = 'JFrogCLI'  // Ensure this is configured in your Jenkins tools
     }
 
     stages {
