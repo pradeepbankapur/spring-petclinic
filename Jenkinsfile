@@ -12,14 +12,19 @@ pipeline {
         MAVEN_REPO = 'spring-petclinic-maven'
         DOCKER_REPO = 'docker-jfrog'
         DOCKER_IMAGE = 'spring-petclinic'
-        JFROG_ACCESS_TOKEN = credentials('artifactory-access-token')
     }
 
     stages {
-        stage('Configure JFrog CLI') {
+         stage('Configure JFrog CLI') {
             steps {
-                script {
-                    sh "jf rt config --url https://${ARTIFACTORY_URL} --access-token ${JFROG_ACCESS_TOKEN} --interactive=false"
+                withCredentials([string(credentialsId: 'artifactory-access-token', variable: 'JFROG_ACCESS_TOKEN')]) {
+                    sh """
+                        jf c add \
+                        --url https://${ARTIFACTORY_URL} \
+                        --access-token ${JFROG_ACCESS_TOKEN} \
+                        --interactive=false \
+                        --name default
+                    """
                 }
             }
         }
