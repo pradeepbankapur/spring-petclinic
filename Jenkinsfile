@@ -41,10 +41,18 @@ pipeline {
         }
 
         stage('XRay Scan') {
-            steps {
-                sh "jf rt bce '${env.JOB_NAME}' '${env.BUILD_NUMBER}'"
-                sh "jf rt bag '${env.JOB_NAME}' '${env.BUILD_NUMBER}'"
-                sh "jf rt bs '${env.JOB_NAME}' '${env.BUILD_NUMBER}'"
+              steps {
+                withCredentials([string(credentialsId: 'artifactory-access-token', variable: 'JFROG_ACCESS_TOKEN')]) {
+                    sh """
+                        jf rt bce '${env.JOB_NAME}' '${env.BUILD_NUMBER}' --access-token ${JFROG_ACCESS_TOKEN}
+                    """
+                    sh """
+                        jf rt bag '${env.JOB_NAME}' '${env.BUILD_NUMBER}' --access-token ${JFROG_ACCESS_TOKEN}
+                    """
+                    sh """
+                        jf bs '${env.JOB_NAME}' '${env.BUILD_NUMBER}' --access-token ${JFROG_ACCESS_TOKEN}
+                    """
+                }
             }
         }
 
