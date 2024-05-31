@@ -29,7 +29,9 @@ pipeline {
 
         stage('XRay Scan') {
             steps {
-               sh "jf scan --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER}"
+               sh "jf rt build-collect-env ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+               sh "jf rt build-add-git ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+               sh "jf build-scan ${env.JOB_NAME} ${env.BUILD_NUMBER}"
             }
         }
 
