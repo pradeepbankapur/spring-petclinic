@@ -10,7 +10,7 @@
 
 This project uses the Spring PetClinic sample application and demonstrates a Jenkins pipeline for compiling, testing, scanning, and deploying a Docker image to JFrog Artifactory.
 
-Below are the steps done:
+### Below are the steps done:
 1. **Build**: Compile the code.
 2. **Test**: Run the unit tests.
 3. **JFrog Xray Scan**: Perform a security scan using JFrog Xray.
@@ -22,7 +22,7 @@ Below are the steps done:
 - JFrog Artifactory
 - Docker
 
-###Command to obtain and run the Docker image:
+### Command to obtain and run the Docker image:
 ```bash
 Login: docker login jfrogspring.jfrog.io -u <username> -p <password>
 Pull the Docker Image: docker pull jfrogspring.jfrog.io/docker-jfrog/spring-petclinic:59
