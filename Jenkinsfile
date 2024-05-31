@@ -8,8 +8,10 @@ pipeline {
     }
 
     environment {
+        ARTIFACTORY_URL = 'jfrogspring.jfrog.io'
+        MAVEN_REPO = 'spring-petclinic-maven'
+        DOCKER_REPO = 'docker-jfrog'
         DOCKER_IMAGE = 'spring-petclinic'
-        ARTIFACTORY_URL = 'jfrogspring.jfrog.io/docker-jfrog'
     }
 
     stages {
@@ -25,16 +27,13 @@ pipeline {
             }
         }
 
-        stage('Package') {
-            steps {
-                sh 'mvn -B package'
-            }
-        }
-
         stage('XRay Scan') {
             steps {
                 script {
-                    sh "jf scan ${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID}"
+                    sh "jf mvn --build-name=${env.BUILD_ID} --build-number={env.BUILD_NUMBER}"
+                    sh "jf rt build-collect-env ${env.BUILD_ID} ${env.BUILD_NUMBER}"
+                    sh "jf rt build-add-dependencies ${env.BUILD_ID} ${env.BUILD_NUMBER}"
+                    sh "jf build-scan ${env.BUILD_ID} ${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -42,7 +41,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    def app = docker.build("${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID}")
+                    def app = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
         }
@@ -51,7 +50,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry("https://${ARTIFACTORY_URL}", 'jfrog-creds') {
-                        docker.image("${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID}").push()
+                        docker.image("${ARTIFACTORY_URL}/${DOCKER_REPO}/${DOCKER_IMAGE}:${env.BUILD_ID}").push()
                     }
                 }
             }
