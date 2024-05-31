@@ -6,6 +6,27 @@
 
 [See the presentation here](https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application)
 
+## JFrog - Project
+
+This project uses the Spring PetClinic sample application and demonstrates a Jenkins pipeline for compiling, testing, scanning, and deploying a Docker image to JFrog Artifactory.
+
+Below are the steps done:
+1. **Build**: Compile the code.
+2. **Test**: Run the unit tests.
+3. **JFrog Xray Scan**: Perform a security scan using JFrog Xray.
+4. **Docker Build**: Package the application as a Docker image.
+5. **Docker Push**: Push the Docker image to JFrog Artifactory.
+
+### Prerequisites
+- Jenkins
+- JFrog Artifactory
+- Docker
+
+###Command to obtain and run the Docker image:
+Login: docker login jfrogspring.jfrog.io -u <username> -p <password>
+Pull the Docker Image: docker pull jfrogspring.jfrog.io/docker-jfrog/spring-petclinic:59
+Run the Docker Container: docker run -d --name petclinic -p 8080:8080 jfrogspring.jfrog.io/docker-jfrog/spring-petclinic:59
+
 ## Run Petclinic locally
 
 Spring Petclinic is a [Spring Boot](https://spring.io/guides/gs/spring-boot) application built using [Maven](https://spring.io/guides/gs/maven/) or [Gradle](https://spring.io/guides/gs/gradle/). You can build a jar file and run it from the command line (it should work just as well with Java 17 or newer):
