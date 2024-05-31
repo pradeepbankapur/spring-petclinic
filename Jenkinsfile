@@ -70,7 +70,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'artifactory-access-token', variable: 'JFROG_ACCESS_TOKEN')]) {
                     sh """
-                        jf docker build ${ARTIFACTORY_URL}/${DOCKER_REPO}/${DOCKER_IMAGE}:${env.BUILD_ID} .
+                        jf docker build --tag ${ARTIFACTORY_URL}/${DOCKER_REPO}/${DOCKER_IMAGE}:${env.BUILD_ID} .
                     """
                 }
             }
