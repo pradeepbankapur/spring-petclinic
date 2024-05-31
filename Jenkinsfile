@@ -68,25 +68,31 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                script {
-                    def app = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
+                withCredentials([string(credentialsId: 'artifactory-access-token', variable: 'JFROG_ACCESS_TOKEN')]) {
+                    sh """
+                        jf docker build ${ARTIFACTORY_URL}/${DOCKER_REPO}/${DOCKER_IMAGE}:${env.BUILD_ID} .
+                    """
                 }
             }
         }
 
         stage('Docker Push') {
             steps {
-                script {
-                    docker.withRegistry("https://${ARTIFACTORY_URL}", 'jfrog-creds') {
-                        docker.image("${ARTIFACTORY_URL}/${DOCKER_REPO}/${DOCKER_IMAGE}:${env.BUILD_ID}").push()
-                    }
+                withCredentials([string(credentialsId: 'artifactory-access-token', variable: 'JFROG_ACCESS_TOKEN')]) {
+                    sh """
+                        jf docker push ${ARTIFACTORY_URL}/${DOCKER_REPO}/${DOCKER_IMAGE}:${env.BUILD_ID}
+                    """
                 }
             }
         }
 
         stage('Clean Up') {
             steps {
-                sh 'docker rmi $(docker images -q)'
+                withCredentials([string(credentialsId: 'artifactory-access-token', variable: 'JFROG_ACCESS_TOKEN')]) {
+                    sh """
+                        jf docker rmi $(jf docker images --quiet)
+                    """
+                }
             }
         }
     }
