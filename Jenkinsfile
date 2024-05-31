@@ -22,8 +22,7 @@ pipeline {
                         jf c add \
                         --url https://${ARTIFACTORY_URL} \
                         --access-token ${JFROG_ACCESS_TOKEN} \
-                        --interactive=false \
-                        --name default
+                        --interactive=false
                     """
                 }
             }
