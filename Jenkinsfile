@@ -38,12 +38,21 @@ pipeline {
         stage('XRay Scan') {
             steps {
                 script {
-                    // Perform the XRay scan
+                    def buildName = env.JOB_NAME
+                    def buildNumber = env.BUILD_NUMBER
                     def buildInfo = 'build-info.json'
-                    sh "jf mvn clean install -DskipTests --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER} --module=${env.JOB_NAME} --build-info-output-file=${buildInfo}"
-                    sh "jf rt build-collect-env ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-                    sh "jf rt build-add-dependencies ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-                    sh "jf rt build-scan ${env.JOB_NAME} ${env.BUILD_NUMBER} --fail"
+
+                    // Run Maven build with JFrog CLI, capturing build information
+                    sh "jf mvn clean install -DskipTests --build-name=${buildName} --build-number=${buildNumber} --module=${buildName} --build-info-output-file=${buildInfo}"
+
+                    // Collect environment variables
+                    sh "jf rt build-collect-env ${buildName} ${buildNumber}"
+
+                    // Add build dependencies
+                    sh "jf rt build-add-dependencies ${buildName} ${buildNumber}"
+
+                    // Perform XRay scan and fail the build if any vulnerabilities are found
+                    sh "jf rt build-scan ${buildName} ${buildNumber} --fail=true"
                 }
             }
         }
