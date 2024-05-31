@@ -1,70 +1,70 @@
 pipeline {
     agent any
-    environment {
-        // Define the Docker image tag
-        DOCKER_IMAGE = 'spring-petclinic:latest'
-        // Define your Artifactory repository key
-        ARTIFACTORY_REPO = 'docker-jfrog'
-        // Define JFrog Artifactory details
-        ARTIFACTORY_URL = 'https://jfrogspring.jfrog.io'
-        ARTIFACTORY_USER = credentials('Pradeep')
-        ARTIFACTORY_API_KEY = credentials('Haloofblood123')
-    }
+
     tools {
-        // Ensure Maven is defined in your Jenkins configuration
         maven 'Jenkins Managed Maven'
+        jdk 'JDK 17'
     }
+
+    environment {
+        DOCKER_IMAGE = 'spring-petclinic'
+        ARTIFACTORY_URL = 'jfrogspring.jfrog.io/docker-jfrog'
+        JFROG_CLI = 'JFrogCLI'  // Ensure this is configured in your Jenkins tools
+    }
+
     stages {
-        stage('Build') {
+        stage('Compile') {
+            steps {
+                sh 'mvn -B clean compile'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'mvn -B test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                sh 'mvn -B package'
+            }
+        }
+
+        stage('XRay Scan') {
             steps {
                 script {
-                    // Clean and install the project without running tests
-                    sh 'mvn clean install -DskipTests'
+                    sh "./jfrog rt scan ${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID} --server-id=jfrog-server"
                 }
             }
         }
-        stage('Test') {
-            steps {
-                // Run tests separately
-                sh 'mvn test'
-            }
-        }
-        stage('JFrog Xray Scan') {
-            steps {
-                script {
-                    // Configure JFrog CLI
-                    sh 'jfrog rt config --url=$ARTIFACTORY_URL --user=$ARTIFACTORY_USER --apikey=$ARTIFACTORY_API_KEY'
-                    // Scan with JFrog Xray
-                    sh 'jfrog rt build-scan ${JOB_NAME}-${BUILD_NUMBER} --fail=true'
-                }
-            }
-        }
+
         stage('Docker Build') {
             steps {
                 script {
-                    // Build Docker image
-                    sh 'docker build -t $DOCKER_IMAGE .'
+                    def app = docker.build("${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
         }
+
         stage('Docker Push') {
             steps {
                 script {
-                    // Log in to JFrog Artifactory
-                    sh 'jfrog rt docker-login'
-                    // Push Docker image to JFrog Artifactory
-                    sh 'jfrog rt docker-push $DOCKER_IMAGE $ARTIFACTORY_REPO'
+                    docker.withRegistry("https://${ARTIFACTORY_URL}", 'jfrog-creds') {
+                        docker.image("${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID}").push()
+                    }
                 }
             }
         }
-    }
-    post {
-        always {
-            script {
-                // Cleanup Docker images
-                sh 'docker rmi $DOCKER_IMAGE || true'
+
+        stage('Clean Up') {
+            steps {
+                sh 'docker rmi $(docker images -q)'
             }
         }
+    }
+
+    post {
         success {
             echo 'Pipeline completed successfully.'
         }
