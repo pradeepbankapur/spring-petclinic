@@ -4,7 +4,7 @@ pipeline {
     tools {
         maven 'Jenkins Managed Maven'
         jdk 'JDK 17'
-        jfrog 'JFrogCLI'
+        jfrog 'jfrog-cli'
     }
 
     environment {
@@ -34,7 +34,7 @@ pipeline {
         stage('XRay Scan') {
             steps {
                 script {
-                    sh "jf scan ${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID} --server-id=jfrog-server"
+                    sh "jf scan ${ARTIFACTORY_URL}/${DOCKER_IMAGE}:${env.BUILD_ID}"
                 }
             }
         }
