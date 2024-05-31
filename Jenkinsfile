@@ -30,7 +30,7 @@ pipeline {
         stage('XRay Scan Setup') {
             steps {
                 script {
-                    sh "jf mvn-config --server-id-resolve=jfrog-server --repo-resolve-releases=${MAVEN_REPO} --repo-deploy-releases=${MAVEN_REPO}"
+                    sh "jf mvn-config --server-id=jfrog-server --repo-resolve-releases=spring-petclinic-maven --repo-resolve-snapshots=spring-petclinic-maven --repo-deploy-releases=spring-petclinic-maven --repo-deploy-snapshots=spring-petclinic-maven"
                 }
             }
         }
