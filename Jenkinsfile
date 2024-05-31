@@ -90,7 +90,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'artifactory-access-token', variable: 'JFROG_ACCESS_TOKEN')]) {
                     sh """
-                        jf docker rmi $(jf docker images --quiet)
+                        jf docker rmi \$(jf docker images --quiet)
                     """
                 }
             }
