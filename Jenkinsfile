@@ -30,7 +30,7 @@ pipeline {
         stage('XRay Scan') {
             steps {
                 script {
-                    sh "jf mvn --build-name=${env.BUILD_ID} --build-number={env.BUILD_NUMBER}"
+                    sh "jf mvn --build-name=${env.BUILD_ID} --build-number=${env.BUILD_NUMBER}"
                     sh "jf rt build-collect-env ${env.BUILD_ID} ${env.BUILD_NUMBER}"
                     sh "jf rt build-add-dependencies ${env.BUILD_ID} ${env.BUILD_NUMBER}"
                     sh "jf build-scan ${env.BUILD_ID} ${env.BUILD_NUMBER}"
