@@ -30,7 +30,6 @@ pipeline {
         stage('XRay Scan') {
             steps {
                sh "jf scan ${env.BUILD_ID} $env.BUILD_NUMBER}"
-                }
             }
         }
 
